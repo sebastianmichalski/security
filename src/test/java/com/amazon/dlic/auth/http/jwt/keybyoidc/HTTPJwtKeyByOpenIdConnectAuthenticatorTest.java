@@ -58,6 +58,23 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 		Assert.assertEquals(3, creds.getAttributes().size());
 	}
 
+
+    @Test
+    public void jwksUriTest() {
+        Settings settings = Settings.builder().put("jwks_uri", mockIdpServer.getJwksUri()).build();
+
+        HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+        AuthCredentials creds = jwtAuth.extractCredentials(new FakeRestRequest(
+            ImmutableMap.of("Authorization", TestJwts.MC_COY_SIGNED_OCT_1), new HashMap<>()), null);
+
+        Assert.assertNotNull(creds);
+        Assert.assertEquals(TestJwts.MCCOY_SUBJECT, creds.getUsername());
+        Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
+        Assert.assertEquals(0, creds.getBackendRoles().size());
+        Assert.assertEquals(3, creds.getAttributes().size());
+    }
+
 	@Test
 	public void testEscapeKid() {
 		Settings settings = Settings.builder().put("openid_connect_url", mockIdpServer.getDiscoverUri()).build();
