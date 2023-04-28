@@ -55,8 +55,10 @@ public abstract class AbstractHTTPJwtAuthenticator implements HTTPAuthenticator 
     private final String jwtUrlParameter;
     private final String subjectKey;
     private final String rolesKey;
+	private final String requiredAudience;
+	private final String requiredIssuer;
 
-    public static final int DEFAULT_CLOCK_SKEW_TOLERANCE_SECONDS = 30;
+	public static final int DEFAULT_CLOCK_SKEW_TOLERANCE_SECONDS = 30;
     private final int clockSkewToleranceSeconds ;
 
     public AbstractHTTPJwtAuthenticator(Settings settings, Path configPath) {
@@ -66,6 +68,8 @@ public abstract class AbstractHTTPJwtAuthenticator implements HTTPAuthenticator 
         rolesKey = settings.get("roles_key");
         subjectKey = settings.get("subject_key");
         clockSkewToleranceSeconds = settings.getAsInt("jwt_clock_skew_tolerance_seconds", DEFAULT_CLOCK_SKEW_TOLERANCE_SECONDS);
+		requiredAudience = settings.get("required_audience");
+		requiredIssuer = settings.get("required_issuer");
 
         try {
             this.keyProvider = this.initKeyProvider(settings, configPath);
@@ -232,5 +236,13 @@ public abstract class AbstractHTTPJwtAuthenticator implements HTTPAuthenticator 
         channel.sendResponse(wwwAuthenticateResponse);
         return true;
     }
+
+	public String getRquiredAudience() {
+		return requiredAudience;
+	}
+
+	public String getRequiredIssuer() {
+		return requiredIssuer;
+	}
 
 }

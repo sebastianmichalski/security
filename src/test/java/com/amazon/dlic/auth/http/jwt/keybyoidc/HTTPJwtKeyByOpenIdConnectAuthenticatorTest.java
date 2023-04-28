@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.opensearch.OpenSearchSecurityException;
 import org.opensearch.common.settings.Settings;
 import org.opensearch.security.user.AuthCredentials;
 import org.opensearch.security.util.FakeRestRequest;
@@ -56,6 +57,44 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 		Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
 		Assert.assertEquals(0, creds.getBackendRoles().size());
 		Assert.assertEquals(3, creds.getAttributes().size());
+	}
+
+
+	@Test
+	public void jwksUriTest() {
+		String requiredIssuer = "requiredIssuer";
+		String requiredAudience = "requiredAudience";
+		Settings settings = Settings.builder()
+			.put("jwks_uri", mockIdpServer.getJwksUri())
+			.put("required_issuer", requiredIssuer)
+			.put("required_audience", requiredAudience)
+			.build();
+
+		HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(settings, null);
+
+		AuthCredentials creds = jwtAuth.extractCredentials(new FakeRestRequest(
+			ImmutableMap.of("Authorization", TestJwts.MC_COY_SIGNED_OCT_1), new HashMap<>()), null);
+
+		Assert.assertNotNull(creds);
+		Assert.assertEquals(TestJwts.MCCOY_SUBJECT, creds.getUsername());
+		Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
+		Assert.assertEquals(0, creds.getBackendRoles().size());
+		Assert.assertEquals(3, creds.getAttributes().size());
+		Assert.assertEquals(requiredAudience, jwtAuth.getRquiredAudience());
+		Assert.assertEquals(requiredIssuer, jwtAuth.getRequiredIssuer());
+	}
+
+	@Test
+	public void jwksUriMissingTest() {
+		var exception = Assert.assertThrows(Exception.class, () -> {
+			HTTPJwtKeyByOpenIdConnectAuthenticator jwtAuth = new HTTPJwtKeyByOpenIdConnectAuthenticator(Settings.builder().build(), null);
+			jwtAuth.extractCredentials(
+				new FakeRestRequest(ImmutableMap.of("Authorization", TestJwts.MC_COY_SIGNED_OCT_1), new HashMap<>()),
+				null);
+		});
+
+		Assert.assertEquals("Authentication backend failed", exception.getMessage());
+		Assert.assertEquals(OpenSearchSecurityException.class, exception.getClass());
 	}
 
 	@Test
