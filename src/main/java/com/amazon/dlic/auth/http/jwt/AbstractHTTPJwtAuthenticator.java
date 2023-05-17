@@ -238,7 +238,7 @@ public abstract class AbstractHTTPJwtAuthenticator implements HTTPAuthenticator 
         return true;
     }
 
-    public String getRquiredAudience() {
+    public String getRequiredAudience() {
         return requiredAudience;
     }
 

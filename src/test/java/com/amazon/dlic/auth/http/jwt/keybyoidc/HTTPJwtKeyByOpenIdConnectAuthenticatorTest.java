@@ -80,7 +80,7 @@ public class HTTPJwtKeyByOpenIdConnectAuthenticatorTest {
 		Assert.assertEquals(TestJwts.TEST_AUDIENCE, creds.getAttributes().get("attr.jwt.aud"));
 		Assert.assertEquals(0, creds.getBackendRoles().size());
 		Assert.assertEquals(3, creds.getAttributes().size());
-		Assert.assertEquals(requiredAudience, jwtAuth.getRquiredAudience());
+		Assert.assertEquals(requiredAudience, jwtAuth.getRequiredAudience());
 		Assert.assertEquals(requiredIssuer, jwtAuth.getRequiredIssuer());
 	}
 
